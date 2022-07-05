@@ -53,23 +53,23 @@ isMovable board = sum freeCount > 0
         directions = ['a', 'd', 'w', 's']
 
 printColor :: Int -> String
-printColor i = "\x1b[" ++ color ++ "\x1b[0m|"
+printColor i = "\x1b[" ++ color ++ printf "%4d" i ++ "\x1b[0m|"
   where color =
           case i of
-              0    -> printf "0m%4d" i
-              2    -> printf "32m%4d" i
-              4    -> printf "31m%4d" i
-              8    -> printf "34m%4d" i
-              16   -> printf "35m%4d" i
-              32   -> printf "36m%4d" i
-              64   -> printf "31m%4d" i
-              128  -> printf "34m%4d" i
-              256  -> printf "35m%4d" i
-              512  -> printf "36m%4d" i
-              1024 -> printf "33m%4d" i
-              2048 -> printf "33m%4d" i
+              0    -> "0m"
+              2    -> "32m"
+              4    -> "31m"
+              8    -> "34m"
+              16   -> "35m"
+              32   -> "36m"
+              64   -> "31m"
+              128  -> "34m"
+              256  -> "35m"
+              512  -> "36m"
+              1024 -> "33m"
+              2048 -> "33m"
 
-showRow :: [Int] -> String
+showRow :: Row -> String
 showRow a = concatMap printColor a ++ printf "\n--------------------"
 
 printBoard :: Board -> IO ()
@@ -78,11 +78,11 @@ printBoard board = do
   mapM_ (putStrLn . showRow) board
 
 addTile :: [Int] -> Board -> Board
-addTile [s1,s2] board = new_grid
+addTile [s1,s2] board = newBoard
   where freeList = freeTiles board
         free = choose s1 freeList
         val = choose s2 [2,2,2,2,2,2,2,4,4,4]
-        new_grid = setTile free val board
+        newBoard = setTile free val board
 
 choose :: Int -> [a] -> a
 choose seed xs = xs !! i
