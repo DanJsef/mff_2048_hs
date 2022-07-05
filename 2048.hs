@@ -10,6 +10,7 @@ type Row = [Int]
 type Board = [Row]
 type Coord = (Int,Int)
 type Coords = [Coord]
+data Move = UP | DOWN | LEFT | RIGHT
 
 initBoard :: [Int] -> Board
 initBoard [s1,s2,s3,s4] = addTile [s1,s2] $ addTile [s3,s4] $ replicate 4 [0,0,0,0]
@@ -41,16 +42,16 @@ merge row = merged ++ padding
         merged  = combine $ filter (/= 0) row
 
 
-move :: Char -> Board -> Board
-move 'a' = map merge
-move 'd' = map (reverse . merge . reverse)
-move 'w' = transpose . move 'a'  . transpose
-move 's' = transpose . move 'd' . transpose
+move :: Move -> Board -> Board
+move LEFT  = map merge
+move RIGHT = map (reverse . merge . reverse)
+move UP    = transpose . move LEFT  . transpose
+move DOWN  = transpose . move RIGHT  . transpose
 
 isMovable :: Board -> Bool
 isMovable board = sum freeCount > 0
   where freeCount = map (\d -> length $ freeTiles $ move d board) directions
-        directions = ['a', 'd', 'w', 's']
+        directions = [LEFT, RIGHT, UP, DOWN]
 
 printColor :: Int -> String
 printColor i = "\x1b[" ++ color ++ printf "%4d" i ++ "\x1b[0m|"
@@ -91,10 +92,10 @@ choose seed xs = xs !! i
 checkWin :: Int -> Board -> Bool
 checkWin diff board = [] /= filter (== diff) (concat board)
 
-captureMove :: IO Char
+captureMove :: IO Move
 captureMove = do
   inp <- getChar
-  case find (==inp) ['w','s','a','d'] of
+  case lookup inp [('a', LEFT), ('d', RIGHT), ('w', UP), ('s', DOWN)] of
       Just x  -> pure x
       Nothing -> do putStrLn "\nUse WASD to select move"
                     captureMove
